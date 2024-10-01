@@ -1,7 +1,11 @@
 with-expecter: True
 inpackage: True
 dir: "{{.InterfaceDir}}"
-mockname: "Mock{{.InterfaceName}}"
+mockname: "Mock{{firstUpper .InterfaceName}}"
 outpkg: "{{.PackageName}}"
-filename: "mock_{{.InterfaceName}}.go"
+filename: "mock_{{lower .InterfaceName}}.go"
 all: True
+packages:
+  github.com/blcvn/corev4-explorer/usecases:
+    config:
+      recursive: True
