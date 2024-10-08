@@ -13,6 +13,8 @@ var (
 	TransformInterval    time.Duration
 	DeltaTaskScheduler   string
 	BalanceTaskScheduler string
+
+	DBType string
 )
 
 func InitConfig() {}
