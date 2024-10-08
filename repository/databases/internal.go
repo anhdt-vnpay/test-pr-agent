@@ -1,6 +1,10 @@
 package databases
 
-import "github.com/blcvn/corev4-explorer/entities"
+import (
+	"context"
+
+	"github.com/blcvn/corev4-explorer/entities"
+)
 
 type taskDB interface {
 	CreateTask(task *entities.Tasks) error
@@ -13,4 +17,5 @@ type dataDB interface {
 	CalculateAccountBalance(taskId string) error
 
 	SaveTransformData(taskId string, data any)
+	SaveBlockAndRawTxs(ctx context.Context, block any, rawTxs []any) error
 }
