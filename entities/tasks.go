@@ -7,12 +7,16 @@ type TaskStatus int32
 const (
 	TaskSync      TaskType = 1
 	TaskTransform TaskType = 2
+	TaskDelta     TaskType = 3
+	TaskBalance   TaskType = 4
+	TaskOffline   TaskType = 5
 )
 
 const (
 	TaskOpen       TaskStatus = 1
 	TaskProcessing TaskStatus = 2
 	TaskDone       TaskStatus = 3
+	TaskClosed     TaskStatus = 4
 )
 
 type Tasks struct {
@@ -20,4 +24,6 @@ type Tasks struct {
 	Type        int32
 	Status      int32
 	BlockNumber uint64
+	ChannelName string
+	NetworkName string
 }

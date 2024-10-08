@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"fmt"
+
 	"github.com/blcvn/corev3-libs/flogging"
 	"github.com/blcvn/corev3-libs/gotracing"
 	"github.com/blcvn/corev4-explorer/common"
@@ -23,7 +25,7 @@ func NewTaskUsecase(t taskRepo, h tasksHandler) *taskUc {
 }
 
 func (uc *taskUc) PerformTransformTask() common.BaseError {
-	if tasks, err := uc.t.LoadTasks(int32(entities.TaskSync), int32(entities.TaskOpen)); err == nil {
+	if tasks, err := uc.t.LoadTasks(int32(entities.TaskSync), int32(entities.TaskClosed)); err == nil {
 		blockNumber := getMaxBlockNumber(tasks)
 		if task, err := uc.t.CreateTask(int32(entities.TaskTransform), int32(entities.TaskOpen), blockNumber); err == nil {
 			if err := uc.t.UpdateTasks(task.Id, task.Type, int32(entities.TaskProcessing), blockNumber); err == nil {
@@ -44,4 +46,14 @@ func (uc *taskUc) PerformTransformTask() common.BaseError {
 	} else {
 		return err
 	}
+}
+
+func (uc *taskUc) PerformDeltaTask() common.BaseError {
+	fmt.Printf("PerformDeltaTask UC\n")
+	return nil
+}
+
+func (uc *taskUc) PerformBalanceTask() common.BaseError {
+	fmt.Printf("PerformBalanceTask UC\n")
+	return nil
 }
