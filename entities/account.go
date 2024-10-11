@@ -16,7 +16,7 @@ type Account struct {
 	NetworkName     string
 	ChannelName     string
 	BlockNum        uint64
-	TransformTaskId string
+	TransformTaskId int64
 }
 
 type AccountTx struct {

@@ -16,7 +16,7 @@ type AccountsOracle struct {
 	NetworkName     []string
 	ChannelName     []string
 	BlockNum        []uint64
-	TransformTaskId []string
+	TransformTaskId []int64
 }
 
 type AccountTxsOracle struct {
@@ -100,8 +100,8 @@ type OnchainTransactionsOracle struct {
 	PreDay          []time.Time
 	NextDay         []time.Time
 	CurrentDay      []time.Time
-	EndOfMonth      []bool
-	TransformTaskId []string
+	EndOfMonth      []string
+	TransformTaskId []int64
 }
 
 type RawTransactionsOracle struct {
