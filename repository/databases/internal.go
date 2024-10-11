@@ -7,9 +7,9 @@ import (
 )
 
 type taskDB interface {
-	CreateTask(task *entities.Tasks) error
-	GetAllTaskByStatus(taskType int32, taskStatus int32) ([]*entities.Tasks, error)
-	UpdateTasksStatus(taskIds []int64, taskStatus int32) error
+	CreateTask(task *entities.Task) error
+	GetAllTaskByStatus(taskType int32, Tasktatus int32) ([]*entities.Task, error)
+	UpdateTaskStatus(taskIds []int64, Tasktatus int32) error
 }
 
 type dataDB interface {

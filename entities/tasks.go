@@ -19,7 +19,7 @@ const (
 	TaskClosed     TaskStatus = 4
 )
 
-type Tasks struct {
+type Task struct {
 	Id          int64
 	Type        int32
 	Status      int32
