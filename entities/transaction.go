@@ -34,6 +34,8 @@ type RawTransaction struct {
 	BlockNum               uint64
 	NetworkName            string
 	ChannelName            string
+	FunctionName           string
+	TxData                 string
 }
 
 type OnchainTransaction struct {
@@ -55,6 +57,6 @@ type OnchainTransaction struct {
 	PreDay          time.Time
 	CurrentDay      time.Time
 	NextDay         time.Time
-	EndOfMonth      bool
-	TransformTaskId string
+	EndOfMonth      string
+	TransformTaskId int64
 }

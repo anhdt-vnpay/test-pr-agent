@@ -1,5 +1,7 @@
 package entities
 
+import "time"
+
 type TaskType int32
 
 type TaskStatus int32
@@ -19,11 +21,19 @@ const (
 	TaskClosed     TaskStatus = 4
 )
 
+// type Tasks struct {
+// 	Id          int64
+// 	Type        int32
+// 	Status      int32
+// 	BlockNumber uint64
+// }
+
 type Task struct {
 	Id          int64
 	Type        int32
 	Status      int32
 	BlockNumber uint64
-	ChannelName string
 	NetworkName string
+	ChannelName string
+	CreateAt    time.Time
 }
