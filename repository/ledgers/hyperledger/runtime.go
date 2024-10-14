@@ -81,7 +81,8 @@ func (l *ledgerRepo) processBlockWithConfig(key string, blockEvent *listener.Com
 	blockData := blockEvent.Block.Data.GetData()
 	blockBytes, err := blockEvent.MarshalBytes()
 	if err != nil {
-		l.logger.Errorf("Failed to marshal block: %s", err)
+		l.logger.Errorf("Failed to marshal block number %d reason %s", blockNumber, err.Error())
+		return nil, err
 	}
 	blockSize := len(blockBytes)
 	txCount := len(blockData)
@@ -112,6 +113,7 @@ func (l *ledgerRepo) processBlockWithConfig(key string, blockEvent *listener.Com
 		rawTx, err := helper.ParseTransation(ebytes, txIndex, blockNumber, validationCodes)
 		if err != nil {
 			l.logger.Errorf("Shard ID %s Channel %s TxIndex %d", shardId, channelName, txIndex)
+			return nil, err
 		}
 		rawTransactions = append(rawTransactions, &entities.RawTransaction{
 			Txhash:         rawTx.TxId,
@@ -125,6 +127,9 @@ func (l *ledgerRepo) processBlockWithConfig(key string, blockEvent *listener.Com
 			FunctionName:   rawTx.FuncName,
 		})
 	}
-	l.dbRepo.SaveBlockAndRawTxs(blockInformation, rawTransactions)
+	err = l.dbRepo.SaveBlockAndRawTxs(blockInformation, rawTransactions)
+	if err != nil {
+		return nil, err
+	}
 	return blockEvent, nil
 }
