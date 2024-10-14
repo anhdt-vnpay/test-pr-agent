@@ -21,13 +21,6 @@ const (
 	TaskClosed     TaskStatus = 4
 )
 
-// type Tasks struct {
-// 	Id          int64
-// 	Type        int32
-// 	Status      int32
-// 	BlockNumber uint64
-// }
-
 type Task struct {
 	Id          int64
 	Type        int32
