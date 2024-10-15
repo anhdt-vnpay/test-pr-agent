@@ -105,7 +105,7 @@ type OnchainTransactionsOracle struct {
 }
 
 type RawTransactionsOracle struct {
-	// Payload                []byte
+	Payload                [][]byte
 	Txhash                 []string
 	BlockTime              []time.Time
 	ChaincodeName          []string

@@ -24,20 +24,6 @@ type Transaction struct {
 	TransformTaskId       string
 }
 
-type RawTransaction struct {
-	Payload                []byte
-	Txhash                 string
-	BlockTime              time.Time
-	ChaincodeName          string
-	ValidationCode         string
-	ChaincodeProposalInput string
-	BlockNum               uint64
-	NetworkName            string
-	ChannelName            string
-	FunctionName           string
-	TxData                 string
-}
-
 type OnchainTransaction struct {
 	Txhash          string
 	TraceNo         string

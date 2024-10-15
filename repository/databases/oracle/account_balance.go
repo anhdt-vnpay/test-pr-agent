@@ -109,3 +109,7 @@ func (odb *OracleDB) SaveAccountBalanceOracle(ctx context.Context, dbTransaction
 
 	return rowsAffected, nil
 }
+
+func (odb *OracleDB) CalculateAccountBalance(taskId int64) error {
+	return nil
+}

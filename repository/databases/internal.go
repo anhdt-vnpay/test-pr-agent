@@ -1,8 +1,6 @@
 package databases
 
 import (
-	"context"
-
 	"github.com/blcvn/corev4-explorer/entities"
 )
 
@@ -13,9 +11,9 @@ type taskDB interface {
 }
 
 type dataDB interface {
-	CalculateAccountDelta(taskId string) error
-	CalculateAccountBalance(taskId string) error
+	CalculateAccountDelta(taskId int64) error
+	CalculateAccountBalance(taskId int64) error
 
-	SaveTransformData(taskId string, data any)
-	SaveBlockAndRawTxs(ctx context.Context, block any, rawTxs []any) error
+	SaveTransformData(taskId int64, data any) error
+	SaveBlockAndRawTxs(block *entities.Block, rawTxs []*entities.RawTransaction) error
 }

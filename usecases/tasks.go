@@ -25,7 +25,7 @@ func NewTaskUsecase(t taskRepo, h tasksHandler) *taskUc {
 }
 
 func (uc *taskUc) PerformTransformTask() common.BaseError {
-	if tasks, err := uc.t.LoadTasks(int32(entities.TaskSync), int32(entities.TaskClosed)); err == nil {
+	if tasks, err := uc.t.LoadTasks(int32(entities.TaskSync), int32(entities.TaskDone)); err == nil {
 		blockNumber := getMaxBlockNumber(tasks)
 		if task, err := uc.t.CreateTask(int32(entities.TaskTransform), int32(entities.TaskOpen), blockNumber); err == nil {
 			if err := uc.t.UpdateTasks(task.Id, task.Type, int32(entities.TaskProcessing), blockNumber); err == nil {

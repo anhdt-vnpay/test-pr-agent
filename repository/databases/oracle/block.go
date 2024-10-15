@@ -5,8 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/blcvn/corev4-explorer/appconfig"
+	"github.com/blcvn/corev4-explorer/entities"
 	"github.com/blcvn/corev4-explorer/types"
 	"github.com/godror/godror"
 )
@@ -29,6 +31,7 @@ const (
 	sql_INIT_INDEXES_BLOCK = `CREATE UNIQUE INDEX IDX_%s ON %s.%s (BLOCK_NUM, NETWORK_NAME, CHANNEL_NAME)`
 
 	sql_INIT_TABLE_RAW_TRANSACTION = `CREATE TABLE %s (
+		"PAYLOAD" BLOB,
 		"TX_HASH" VARCHAR2(255),
 		"BLOCK_TIME" TIMESTAMP,
 		"CHAINCODE_NAME" VARCHAR2(255),
@@ -41,14 +44,14 @@ const (
 
 	sql_INIT_INDEXES_RAW_TRANSACTION = `CREATE UNIQUE INDEX IDX_%s ON %s.%s (TX_HASH, BLOCK_NUM, NETWORK_NAME, CHANNEL_NAME)`
 
-	sql_INSERT_BLOCK = `INSERT INTO %s (BLOCK_NUM, DATA_HASH, PRE_HASH, TX_COUNT, BLOCK_TIME, PREV_BLOCK_HASH, BLOCK_HASH, CHANNEL_GENESIS_HASH,
+	sql_INSERT_BLOCK = `INSERT INTO %s (BLOCK_NUM, DATA_HASH, PRE_HASH, TX_COUNT, BLOCK_TIME, BLOCK_HASH, CHANNEL_GENESIS_HASH,
 		BLOCKSIZE, NETWORK_NAME, CHANNEL_NAME)
-	 VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11)`
+	 VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10)`
 
 	sql_INSERT_RAW_TRANSACTION = `INSERT INTO %s (
 			"TX_HASH", "BLOCK_TIME", "CHAINCODE_NAME", "VALIDATION_CODE",
-			 "CHAINCODE_PROPOSAL_INPUT", "BLOCK_NUM", "NETWORK_NAME", "CHANNEL_NAME"
-		) VALUES (:1, :2, :3, :4, :5, :6, :7, :8)`
+			 "CHAINCODE_PROPOSAL_INPUT", "BLOCK_NUM", "NETWORK_NAME", "CHANNEL_NAME", "PAYLOAD"
+		) VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9)`
 )
 
 func (odb *OracleDB) InitTableBlock(ctx context.Context, networkChannelPairs [][]string) error {
@@ -147,7 +150,7 @@ func (odb *OracleDB) InitTableRawTransaction(ctx context.Context, networkChannel
 	return nil
 }
 
-func (odb *OracleDB) SaveBlock(ctx context.Context, dbTransaction *sql.Tx, block types.BlocksOracle) (int64, error) {
+func (odb *OracleDB) SaveBlock(ctx context.Context, dbTransaction *sql.Tx, block *types.BlocksOracle) (int64, error) {
 
 	tableName := fmt.Sprintf("%s.%s", odb.Schema, appconfig.OnchainTableNameMapping["block"])
 	sql := fmt.Sprintf(sql_INSERT_BLOCK, tableName)
@@ -161,7 +164,6 @@ func (odb *OracleDB) SaveBlock(ctx context.Context, dbTransaction *sql.Tx, block
 			block.Prehash,
 			block.Txcount,
 			block.BlockTime,
-			block.PrevBlockhash,
 			block.Blockhash,
 			block.ChannelGenesisHash,
 			block.Blksize,
@@ -184,7 +186,6 @@ func (odb *OracleDB) SaveBlock(ctx context.Context, dbTransaction *sql.Tx, block
 			block.Prehash,
 			block.Txcount,
 			block.BlockTime,
-			block.PrevBlockhash,
 			block.Blockhash,
 			block.ChannelGenesisHash,
 			block.Blksize,
@@ -203,7 +204,7 @@ func (odb *OracleDB) SaveBlock(ctx context.Context, dbTransaction *sql.Tx, block
 	return rowsAffected, nil
 }
 
-func (odb *OracleDB) SaveRawTransaction(ctx context.Context, dbTransaction *sql.Tx, rawTransaction types.RawTransactionsOracle) (int64, error) {
+func (odb *OracleDB) SaveRawTransaction(ctx context.Context, dbTransaction *sql.Tx, rawTransaction *types.RawTransactionsOracle) (int64, error) {
 
 	// Prepare the SQL statement
 	tableName := fmt.Sprintf("%s.%s", odb.Schema, appconfig.OnchainTableNameMapping["raw_transaction"])
@@ -222,6 +223,7 @@ func (odb *OracleDB) SaveRawTransaction(ctx context.Context, dbTransaction *sql.
 			rawTransaction.BlockNum,
 			rawTransaction.NetworkName,
 			rawTransaction.ChannelName,
+			rawTransaction.Payload,
 		)
 
 		if err != nil {
@@ -242,6 +244,7 @@ func (odb *OracleDB) SaveRawTransaction(ctx context.Context, dbTransaction *sql.
 			rawTransaction.BlockNum,
 			rawTransaction.NetworkName,
 			rawTransaction.ChannelName,
+			rawTransaction.Payload,
 		)
 
 		if err != nil {
@@ -253,4 +256,83 @@ func (odb *OracleDB) SaveRawTransaction(ctx context.Context, dbTransaction *sql.
 	}
 
 	return rowsAffected, nil
+}
+
+func (odb *OracleDB) SaveTransformData(taskId int64, data any) error {
+	return nil
+}
+func (odb *OracleDB) SaveBlockAndRawTxs(block *entities.Block, rawTxs []*entities.RawTransaction) error {
+	var err error
+	blockTrace := fmt.Sprintf("%s_%s_%d", block.NetworkName, block.ChannelName, block.Blocknum)
+	ctx, cancel := context.WithTimeout(odb.ctx, appconfig.TransactionDBTimeout)
+	defer cancel()
+	sqlTx, _err := odb.Client.BeginTx(ctx, &sql.TxOptions{})
+	if _err != nil {
+		return _err
+	}
+
+	defer func() {
+		if err != nil {
+			odb.logger.Errorf("[%s] SaveBlockAndRawTxs error: %s", err.Error())
+			odb.logger.Warnf("[%s] Rolling back DB Transaction !", blockTrace)
+			if rollbackErr := sqlTx.Rollback(); rollbackErr != nil {
+				odb.logger.Errorf("[%s] Failed to RollBackTransaction : %s", blockTrace, rollbackErr.Error())
+			}
+		}
+	}()
+
+	var errChan = make(chan error, 3)
+	var wg sync.WaitGroup
+
+	blocksOracle := odb.transform.BlockToBlockOracle([]*entities.Block{block})
+	if len(blocksOracle.Blocknum) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _err := odb.SaveBlock(ctx, sqlTx, blocksOracle)
+			if _err != nil {
+				errChan <- _err
+			}
+		}()
+	}
+
+	rawTxsOracle := odb.transform.RawTxsToRawTxsOracle(rawTxs)
+	if len(rawTxsOracle.BlockNum) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _err := odb.SaveRawTransaction(ctx, sqlTx, rawTxsOracle)
+			if _err != nil {
+				errChan <- _err
+			}
+		}()
+	}
+
+	taskSyncOracle := odb.transform.TasksToTaskOracle([]*entities.Task{
+		{
+			Type:        int32(entities.TaskSync),
+			Status:      int32(entities.TaskDone),
+			BlockNumber: block.Blocknum,
+			NetworkName: block.NetworkName,
+			ChannelName: block.ChannelName,
+		},
+	})
+	if len(taskSyncOracle.BlockNumber) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_err := odb.InsertTask(ctx, sqlTx, taskSyncOracle)
+			if _err != nil {
+				errChan <- _err
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errChan)
+	for err := range errChan {
+		return err
+	}
+	err = sqlTx.Commit()
+	return err
 }

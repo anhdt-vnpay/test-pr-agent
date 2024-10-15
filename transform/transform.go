@@ -128,6 +128,7 @@ func (t *transform) OnchainTxsToOnchainTxOracle(transactions []*entities.Onchain
 func (t *transform) RawTxsToRawTxsOracle(rawTxs []*entities.RawTransaction) *types.RawTransactionsOracle {
 	rawTxOracle := &types.RawTransactionsOracle{}
 	for _, rawTx := range rawTxs {
+		rawTxOracle.Payload = append(rawTxOracle.Payload, rawTx.Payload)
 		rawTxOracle.Txhash = append(rawTxOracle.Txhash, rawTx.Txhash)
 		rawTxOracle.BlockTime = append(rawTxOracle.BlockTime, rawTx.BlockTime)
 		rawTxOracle.ChaincodeName = append(rawTxOracle.ChaincodeName, rawTx.ChaincodeName)

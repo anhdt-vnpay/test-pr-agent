@@ -3,9 +3,12 @@ package hyperledger
 import (
 	"context"
 	"encoding/hex"
-	"time"
+	"fmt"
 
+	"github.com/blcvn/corev4-explorer/appconfig"
 	"github.com/blcvn/corev4-explorer/entities"
+	"github.com/blcvn/corev4-explorer/helper/statehelper"
+	"github.com/blcvn/corev4-explorer/transform"
 
 	"github.com/blcvn/corev3-libs/flogging"
 	"github.com/blcvn/corev3-libs/ledger/hyperledger/config"
@@ -25,48 +28,56 @@ type ledgerRepo struct {
 	// processBlock   func(key string, blockEvent *listener.CommonBlockWrapper) (*listener.CommonBlockWrapper, error)
 }
 
-func NewLedgerRepository(fCfg config.FabricConfig) iLedgerRepo {
-	lr := &ledgerRepo{}
-	lr.logger = flogging.MustGetLogger("corev4-explorer.repository.ledgers.hyperledger")
+func NewLedgerRepository(fCfg *config.FabricConfig, dbRepo dbRepo) iLedgerRepo {
 
 	listenerOption := listener.ListenerOption{
-		RootFolder:                 "./tmp",
-		MaxQueryGoroutine:          1,
-		BlockMainQueueSize:         100,
-		BlockExceptionQueueSize:    100,
-		NumberBlockParsingWorker:   100,
-		BlockLoadExceptionInterval: 500 * time.Second,
-		BlockMinExceptionLoadTime:  500 * time.Second,
-		UpdateMissing:              true,
-		BlockSyncTime:              10 * time.Second,
+		RootFolder:                 appconfig.KvDBRootPath,
+		MaxQueryGoroutine:          appconfig.BlockMainQueueSize,
+		BlockMainQueueSize:         int64(appconfig.BlockMainQueueSize),
+		BlockExceptionQueueSize:    int64(appconfig.BlockExceptionQueueSize),
+		NumberBlockParsingWorker:   appconfig.NumberBlockParsingWorker,
+		BlockLoadExceptionInterval: appconfig.BlockLoadExceptionInterval,
+		BlockMinExceptionLoadTime:  appconfig.BlockMinExceptionLoadTime,
+		UpdateMissing:              appconfig.UpdateMissing,
+		BlockSyncTime:              appconfig.BlockSyncTime,
 	}
-	// lr.listenerOption = listenerOption
+	st, err := statehelper.NewStateHelper()
+	if err != nil {
+		panic(fmt.Sprintf("Can't create state helper: %s", err.Error()))
+	}
+
+	tf := transform.NewTransform()
+
+	lr := &ledgerRepo{
+		listenerOption: listenerOption,
+		shardingMap:    cmap.New[ledgerClient](),
+		logger:         flogging.MustGetLogger("corev4-explorer.repository.ledgers.hyperledger"),
+		dbRepo:         dbRepo,
+	}
 
 	flowClient := flow.NewFlow(
 		flow.WithFlowClientOption(client.NewClient(
 			client.WithLoggerOption(lr.logger),
 		)),
 		flow.WithLoggerOption(lr.logger),
-		flow.WithPeerGRPCTimeoutOption(3*time.Second),
+		flow.WithPeerGRPCTimeoutOption(appconfig.PeerGRPCTimeout),
 	)
 
-	st := &stateHelper{}
-
 	for _, channelConfig := range fCfg.Network.Channels {
-		lc := listener.NewLedgerClient[*Tx](channelConfig,
-			listener.WithClientFlowClientOption[*Tx](flowClient),
-			listener.WithClientLoggerOption[*Tx](lr.logger),
-			listener.WithClientStateHelperOption[*Tx](st),
-			listener.WithClientListenerOption[*Tx](listenerOption),
-			listener.WithClientTransformerOption[*Tx](&transform{}),
+		lc := listener.NewLedgerClient[*entities.RawTransaction](channelConfig,
+			listener.WithClientFlowClientOption[*entities.RawTransaction](flowClient),
+			listener.WithClientLoggerOption[*entities.RawTransaction](lr.logger),
+			listener.WithClientStateHelperOption[*entities.RawTransaction](st),
+			listener.WithClientListenerOption[*entities.RawTransaction](listenerOption),
+			listener.WithClientTransformerOption[*entities.RawTransaction](tf),
+			listener.WithClientKvDbTypeOption[*entities.RawTransaction](appconfig.KvDBType),
 		)
 		lc.SetupProcessBlockJob(func(key string, blockEvent *listener.CommonBlockWrapper) (*listener.CommonBlockWrapper, error) {
-			lr.processBlockWithConfig(key, blockEvent, channelConfig.ID, channelConfig.ShardId)
-			return blockEvent, nil
+			return lr.processBlockWithConfig(key, blockEvent, channelConfig.ID, channelConfig.ShardId)
 		})
 		lr.shardingMap.Set(channelConfig.ShardId, lc)
 	}
-	return &ledgerRepo{listenerOption: listenerOption}
+	return lr
 }
 
 func (l *ledgerRepo) Start(ctx context.Context) {
@@ -116,15 +127,15 @@ func (l *ledgerRepo) processBlockWithConfig(key string, blockEvent *listener.Com
 			return nil, err
 		}
 		rawTransactions = append(rawTransactions, &entities.RawTransaction{
-			Txhash:         rawTx.TxId,
-			ChaincodeName:  rawTx.Chaincode,
-			ValidationCode: string(validationCodes),
-			BlockNum:       blockNumber,
-			NetworkName:    shardId,
-			ChannelName:    channelName,
-			BlockTime:      blockEvent.ReceiveTime,
-			TxData:         string(rawTx.Data),
-			FunctionName:   rawTx.FuncName,
+			Txhash:                 rawTx.TxId,
+			ChaincodeName:          rawTx.Chaincode,
+			ValidationCode:         rawTx.ValidationCode.String(),
+			BlockNum:               blockNumber,
+			NetworkName:            shardId,
+			ChannelName:            channelName,
+			BlockTime:              blockEvent.ReceiveTime,
+			ChaincodeProposalInput: rawTx.FuncName,
+			Payload:                rawTx.Data,
 		})
 	}
 	err = l.dbRepo.SaveBlockAndRawTxs(blockInformation, rawTransactions)

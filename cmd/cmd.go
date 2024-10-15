@@ -30,7 +30,11 @@ var syncCmd = &cobra.Command{
 	Use:   "sync",
 	Short: "Sync block from blockchain",
 	Run: func(cmd *cobra.Command, args []string) {
-		sync()
+		metricPort, _ := cmd.Flags().GetInt("metric_port")
+		if metricPort == 0 {
+			metricPort = 4200
+		}
+		sync(metricPort)
 	},
 }
 
@@ -38,12 +42,13 @@ var processTasks = &cobra.Command{
 	Use:   "process-task",
 	Short: "Processing ",
 	Run: func(cmd *cobra.Command, args []string) {
-		sync()
+		performTasks()
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(versionCmd)
+	syncCmd.Flags().Int("metric_port", 4200, "metric_port")
 	RootCmd.AddCommand(syncCmd)
 	RootCmd.AddCommand(processTasks)
 }

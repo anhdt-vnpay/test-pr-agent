@@ -61,7 +61,7 @@ func (t *taskHandler) transformData(taskId int64) common.BaseError {
 
 	for _, rawTransaction := range rawTransactions {
 
-		if strings.HasPrefix(rawTransaction.FunctionName, "Transaction.") {
+		if strings.HasPrefix(rawTransaction.ChaincodeProposalInput, "Transaction.") {
 			newTransactions, err := t.rawTxToTransactions(rawTransaction, transformTask.Id)
 			if err != nil {
 				return err
@@ -70,7 +70,7 @@ func (t *taskHandler) transformData(taskId int64) common.BaseError {
 
 		}
 
-		if strings.HasPrefix(rawTransaction.FunctionName, "Account.") {
+		if strings.HasPrefix(rawTransaction.ChaincodeProposalInput, "Account.") {
 			newAccounts, err := t.rawTxToAccounts(rawTransaction, transformTask.Id)
 			if err != nil {
 				return err
@@ -91,7 +91,7 @@ func (t *taskHandler) calculateAccountDelta(taskId int64) common.BaseError {
 func (t *taskHandler) rawTxToTransactions(rawTransaction *entities.RawTransaction, taskId int64) ([]*entities.OnchainTransaction, common.BaseError) {
 	var onchainTxList []*entities.OnchainTransaction
 
-	response, err := contractpb.NewTransactionResponse([]byte(rawTransaction.TxData))
+	response, err := contractpb.NewTransactionResponse(rawTransaction.Payload)
 	if err != nil {
 		t.logger.Errorf("Create new transaction response error %s", err.Error())
 		return nil, common.NewUnknownError(err)
@@ -148,7 +148,7 @@ func (t *taskHandler) rawTxToTransactions(rawTransaction *entities.RawTransactio
 func (t *taskHandler) rawTxToAccounts(rawTransaction *entities.RawTransaction, taskId int64) ([]*entities.Account, common.BaseError) {
 	var accountList []*entities.Account
 
-	response, err := contractpb.NewAccountResponse([]byte(rawTransaction.TxData))
+	response, err := contractpb.NewAccountResponse(rawTransaction.Payload)
 	if err != nil {
 		t.logger.Errorf("Create new account response error %s", err.Error())
 		return nil, common.NewUnknownError(err)

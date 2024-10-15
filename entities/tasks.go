@@ -26,6 +26,8 @@ type Task struct {
 	Type        int32
 	Status      int32
 	BlockNumber uint64
+	StartBlock  uint64
+	EndBlock    uint64
 	NetworkName string
 	ChannelName string
 	CreateAt    time.Time
