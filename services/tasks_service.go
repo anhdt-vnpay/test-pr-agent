@@ -46,18 +46,18 @@ func (s *taskService) Start() {
 			<-ticker.C
 		}
 	}()
-	s.scheduler.AddFunc(s.deltaTaskScheduler, func() {
-		err := s.usecases.PerformDeltaTask()
-		if err != nil {
-			s.logger.Errorf("[catch me] PerformDeltaTask: %s", err.Error())
-		}
-	})
+	// s.scheduler.AddFunc(s.deltaTaskScheduler, func() {
+	// 	err := s.usecases.PerformDeltaTask()
+	// 	if err != nil {
+	// 		s.logger.Errorf("[catch me] PerformDeltaTask: %s", err.Error())
+	// 	}
+	// })
 
-	s.scheduler.AddFunc(s.balanceTaskScheduler, func() {
-		err := s.usecases.PerformBalanceTask()
-		if err != nil {
-			s.logger.Errorf("[catch me] PerformBalanceTask: %s", err.Error())
-		}
-	})
-	s.scheduler.Start()
+	// s.scheduler.AddFunc(s.balanceTaskScheduler, func() {
+	// 	err := s.usecases.PerformBalanceTask()
+	// 	if err != nil {
+	// 		s.logger.Errorf("[catch me] PerformBalanceTask: %s", err.Error())
+	// 	}
+	// })
+	// s.scheduler.Start()
 }

@@ -35,7 +35,7 @@ type AccountTxsOracle struct {
 	NextDay         []time.Time
 	CurrentDay      []time.Time
 	EndOfMonth      []string
-	TransformTaskId []string
+	TransformTaskId []int64
 }
 
 type AccountsBalanceOracle struct {

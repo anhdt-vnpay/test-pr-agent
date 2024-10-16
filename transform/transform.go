@@ -27,6 +27,7 @@ func (t *transform) AccountsToAccountOracle(accounts []*entities.Account) *types
 		accountOracle.ChannelName = append(accountOracle.ChannelName, account.ChannelName)
 		accountOracle.BlockNum = append(accountOracle.BlockNum, account.BlockNum)
 		accountOracle.TransformTaskId = append(accountOracle.TransformTaskId, account.TransformTaskId)
+		accountOracle.Amount = append(accountOracle.Amount, account.Amount)
 	}
 	return accountOracle
 }

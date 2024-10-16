@@ -19,6 +19,7 @@ const (
 	TaskProcessing TaskStatus = 2
 	TaskDone       TaskStatus = 3
 	TaskClosed     TaskStatus = 4
+	TaskFailed     TaskStatus = 5
 )
 
 type Task struct {

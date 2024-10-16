@@ -34,7 +34,7 @@ type AccountTx struct {
 	CurrentDay      time.Time
 	EndOfMonth      string
 	CreatedAt       time.Time
-	TransformTaskId string
+	TransformTaskId int64
 }
 
 type AccountsBalance struct {

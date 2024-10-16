@@ -52,6 +52,13 @@ const (
 			"TX_HASH", "BLOCK_TIME", "CHAINCODE_NAME", "VALIDATION_CODE",
 			 "CHAINCODE_PROPOSAL_INPUT", "BLOCK_NUM", "NETWORK_NAME", "CHANNEL_NAME", "PAYLOAD"
 		) VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9)`
+
+	sql_QUERY_RAW_TXS_BY_TRANSFORM = `SELECT b.BLOCK_NUM, b.TX_HASH, b.PAYLOAD, 
+		b.CHAINCODE_NAME, b.VALIDATION_CODE, 
+		b.CHANNEL_NAME, b.NETWORK_NAME, b.BLOCK_TIME, b.CHAINCODE_PROPOSAL_INPUT 
+		FROM %s a LEFT JOIN %s b 
+		ON a.BLOCK_NUM = b.BLOCK_NUM AND a.NETWORK_NAME = b.NETWORK_NAME  AND a.CHANNEL_NAME = b.CHANNEL_NAME
+		WHERE a.TASK_TRANSFORM_ID = :1 AND a."TYPE" = :2`
 )
 
 func (odb *OracleDB) InitTableBlock(ctx context.Context, networkChannelPairs [][]string) error {
@@ -258,8 +265,74 @@ func (odb *OracleDB) SaveRawTransaction(ctx context.Context, dbTransaction *sql.
 	return rowsAffected, nil
 }
 
-func (odb *OracleDB) SaveTransformData(taskId int64, data any) error {
-	return nil
+func (odb *OracleDB) SaveTransformData(taskId int64, onchainTransactions []*entities.OnchainTransaction, accounts []*entities.Account, accountTxsList []*entities.AccountTx) error {
+	var err error
+	ctx, cancel := context.WithTimeout(odb.ctx, appconfig.TransactionDBTimeout)
+	defer cancel()
+	sqlTx, _err := odb.Client.BeginTx(ctx, &sql.TxOptions{})
+	if _err != nil {
+		return _err
+	}
+
+	defer func() {
+		if err != nil {
+			odb.logger.Errorf("[%d] SaveTransformData error: %s", taskId, err.Error())
+			odb.logger.Warnf("[%d] SaveTransformData Rolling back DB Transaction !", taskId)
+			if rollbackErr := sqlTx.Rollback(); rollbackErr != nil {
+				odb.logger.Errorf("[%d] SaveTransformData Failed to RollBackTransaction : %s", taskId, rollbackErr.Error())
+			}
+		}
+	}()
+
+	var errChan = make(chan error, 3)
+	var wg sync.WaitGroup
+	onTxsOracle := odb.transform.OnchainTxsToOnchainTxOracle(onchainTransactions)
+	if len(onTxsOracle.TraceNo) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _err := odb.SaveOnchainTransaction(ctx, sqlTx, onTxsOracle)
+			if _err != nil {
+				fmt.Println(1)
+				errChan <- _err
+			}
+		}()
+	}
+
+	accountTxsOracle := odb.transform.AccountTxsToAccountTxOracle(accountTxsList)
+	if len(accountTxsOracle.TraceNo) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _err := odb.SaveAccountTxOracle(ctx, sqlTx, accountTxsOracle)
+			if _err != nil {
+				fmt.Println(2)
+				errChan <- _err
+			}
+		}()
+	}
+
+	accountsOracle := odb.transform.AccountsToAccountOracle(accounts)
+	if len(accountsOracle.TraceNo) > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, _err := odb.SaveAccountOracle(ctx, sqlTx, accountsOracle)
+			if _err != nil {
+				fmt.Println(3)
+				errChan <- _err
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errChan)
+	for _err := range errChan {
+		err = _err
+		return err
+	}
+	err = sqlTx.Commit()
+	return err
 }
 func (odb *OracleDB) SaveBlockAndRawTxs(block *entities.Block, rawTxs []*entities.RawTransaction) error {
 	var err error
@@ -273,7 +346,7 @@ func (odb *OracleDB) SaveBlockAndRawTxs(block *entities.Block, rawTxs []*entitie
 
 	defer func() {
 		if err != nil {
-			odb.logger.Errorf("[%s] SaveBlockAndRawTxs error: %s", err.Error())
+			odb.logger.Errorf("[%s] SaveBlockAndRawTxs error: %s", blockTrace, err.Error())
 			odb.logger.Warnf("[%s] Rolling back DB Transaction !", blockTrace)
 			if rollbackErr := sqlTx.Rollback(); rollbackErr != nil {
 				odb.logger.Errorf("[%s] Failed to RollBackTransaction : %s", blockTrace, rollbackErr.Error())
@@ -321,7 +394,7 @@ func (odb *OracleDB) SaveBlockAndRawTxs(block *entities.Block, rawTxs []*entitie
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			_err := odb.InsertTask(ctx, sqlTx, taskSyncOracle)
+			_, _err := odb.InsertTask(ctx, sqlTx, taskSyncOracle)
 			if _err != nil {
 				errChan <- _err
 			}
@@ -335,4 +408,33 @@ func (odb *OracleDB) SaveBlockAndRawTxs(block *entities.Block, rawTxs []*entitie
 	}
 	err = sqlTx.Commit()
 	return err
+}
+
+func (odb *OracleDB) QueryRawTxsByTaskTransformID(taskId int64) ([]*entities.RawTransaction, error) {
+	ctx, cancel := context.WithTimeout(odb.ctx, appconfig.TransactionDBTimeout)
+	defer cancel()
+	tableBlockName := fmt.Sprintf("%s.%s", odb.Schema, appconfig.OnchainTableNameMapping["task"])
+	tableRawTxName := fmt.Sprintf("%s.%s", odb.Schema, appconfig.OnchainTableNameMapping["raw_transaction"])
+	sql := fmt.Sprintf(sql_QUERY_RAW_TXS_BY_TRANSFORM, tableBlockName, tableRawTxName)
+	result, err := odb.Client.QueryContext(ctx,
+		sql,
+		taskId,
+		entities.TaskSync,
+	)
+	if err != nil {
+		odb.logger.Errorf("CreateTaskTransform update task for block error: %s", err.Error())
+		return nil, err
+	}
+	var res []*entities.RawTransaction
+	for result.Next() {
+		var tx entities.RawTransaction
+		if err := result.Scan(&tx.BlockNum, &tx.Txhash, &tx.Payload,
+			&tx.ChaincodeName, &tx.ValidationCode,
+			&tx.ChannelName, &tx.NetworkName, &tx.BlockTime, &tx.ChaincodeProposalInput); err != nil {
+			odb.logger.Errorf("CreateTaskTransform scan count error: %s", err.Error())
+			return res, err
+		}
+		res = append(res, &tx)
+	}
+	return res, nil
 }

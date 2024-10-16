@@ -6,8 +6,8 @@ import (
 )
 
 type taskRepo interface {
-	LoadTasks(taskType int32, taskStatus int32) ([]*entities.Task, common.BaseError)
-	CreateTask(taskType int32, taskStatus int32, data any) (*entities.Task, common.BaseError)
+	// LoadTasks(taskType int32, taskStatus int32) ([]*entities.Task, common.BaseError)
+	CreateTask(taskType int32, taskStatus int32) (*entities.Task, common.BaseError)
 	UpdateTasks(tasksId int64, tasksType int32, taskStatus int32, data any) common.BaseError
 }
 

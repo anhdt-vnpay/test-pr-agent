@@ -21,7 +21,7 @@ var (
 	NetWorkType string
 	FabricCfg   *config.FabricConfig
 
-	TransformInterval    time.Duration
+	TransformInterval    time.Duration = 30 * time.Second
 	DeltaTaskScheduler   string
 	BalanceTaskScheduler string
 

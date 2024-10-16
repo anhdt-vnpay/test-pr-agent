@@ -19,33 +19,29 @@ type taskUc struct {
 
 func NewTaskUsecase(t taskRepo, h tasksHandler) *taskUc {
 	return &taskUc{
-		t: t,
-		h: h,
+		t:      t,
+		h:      h,
+		logger: flogging.MustGetLogger("corev4-explorer.usecase.task"),
 	}
 }
 
 func (uc *taskUc) PerformTransformTask() common.BaseError {
-	if tasks, err := uc.t.LoadTasks(int32(entities.TaskSync), int32(entities.TaskDone)); err == nil {
-		blockNumber := getMaxBlockNumber(tasks)
-		if task, err := uc.t.CreateTask(int32(entities.TaskTransform), int32(entities.TaskOpen), blockNumber); err == nil {
-			if err := uc.t.UpdateTasks(task.Id, task.Type, int32(entities.TaskProcessing), blockNumber); err == nil {
-				if err := uc.h.PerformTasks(task.Id, task.Type); err == nil {
-					if err := uc.t.UpdateTasks(task.Id, task.Type, int32(entities.TaskDone), blockNumber); err == nil {
-						return nil
-					} else {
-						return err
-					}
-				}
-			} else {
-				return err
+	if task, err := uc.t.CreateTask(int32(entities.TaskTransform), int32(entities.TaskProcessing)); err != nil {
+		return err
+	} else {
+		if err := uc.h.PerformTasks(task.Id, int32(entities.TaskTransform)); err != nil {
+			uc.logger.Errorf("PerformTasks id: %d type: %d error: %s", task.Id, entities.TaskTransform, err.Error())
+			if _err := uc.t.UpdateTasks(task.Id, task.Type, int32(entities.TaskFailed), nil); _err != nil {
+				uc.logger.Errorf("UpdateTasks id: %d status: %d error: %s", task.Id, entities.TaskFailed, _err.Error())
+				return _err
 			}
-			return nil
-		} else {
+		}
+		if err := uc.t.UpdateTasks(task.Id, int32(entities.TaskDone), 0, nil); err != nil {
+			uc.logger.Errorf("UpdateTasks id: %d status: %d error: %s", task.Id, entities.TaskDone, err.Error())
 			return err
 		}
-	} else {
-		return err
 	}
+	return nil
 }
 
 func (uc *taskUc) PerformDeltaTask() common.BaseError {

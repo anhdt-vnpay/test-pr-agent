@@ -38,11 +38,15 @@ var syncCmd = &cobra.Command{
 	},
 }
 
-var processTasks = &cobra.Command{
+var processTasksCmd = &cobra.Command{
 	Use:   "process-task",
 	Short: "Processing ",
 	Run: func(cmd *cobra.Command, args []string) {
-		performTasks()
+		metricPort, _ := cmd.Flags().GetInt("metric_port")
+		if metricPort == 0 {
+			metricPort = 4201
+		}
+		performTasks(metricPort)
 	},
 }
 
@@ -50,5 +54,6 @@ func init() {
 	RootCmd.AddCommand(versionCmd)
 	syncCmd.Flags().Int("metric_port", 4200, "metric_port")
 	RootCmd.AddCommand(syncCmd)
-	RootCmd.AddCommand(processTasks)
+	processTasksCmd.Flags().Int("metric_port", 4201, "metric_port")
+	RootCmd.AddCommand(processTasksCmd)
 }
