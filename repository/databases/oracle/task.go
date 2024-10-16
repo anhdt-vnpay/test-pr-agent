@@ -152,5 +152,39 @@ func (odb *OracleDB) CreateNewTaskBalance(taskStatus int32) (*entities.Task, err
 	return nil, nil
 }
 func (odb *OracleDB) UpdateTasksStatus(taskId int64, taskStatus int32) error {
+	// Set a context with a timeout for the update operation
+	ctx, cancel := context.WithTimeout(odb.ctx, appconfig.TransactionDBTimeout)
+	defer cancel()
+
+	// Begin a transaction
+	sqlTx, err := odb.Client.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Prepare the SQL update statement
+	tableName := fmt.Sprintf("%s.%s", odb.Schema, appconfig.OnchainTableNameMapping["task"])
+	updateSQL := fmt.Sprintf(sql_UPDATE_TASK_STATUS, tableName)
+
+	// Execute the SQL update query
+	res, err := sqlTx.ExecContext(ctx, updateSQL, taskStatus, taskId)
+	if err != nil {
+		return err
+	}
+
+	// Check how many rows were updated
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return err
+	}
+
+	// Commit the transaction
+	if err = sqlTx.Commit(); err != nil {
+		return err
+	}
+	
 	return nil
 }

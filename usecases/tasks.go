@@ -36,7 +36,7 @@ func (uc *taskUc) PerformTransformTask() common.BaseError {
 				return _err
 			}
 		}
-		if err := uc.t.UpdateTasks(task.Id, int32(entities.TaskDone), 0, nil); err != nil {
+		if err := uc.t.UpdateTasks(task.Id, 0, int32(entities.TaskDone), nil); err != nil {
 			uc.logger.Errorf("UpdateTasks id: %d status: %d error: %s", task.Id, entities.TaskDone, err.Error())
 			return err
 		}
