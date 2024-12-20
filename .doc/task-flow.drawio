@@ -1,0 +1,124 @@
+<mxfile host="65bd71144e">
+    <diagram id="16qm_pp9fAImd1J_W2m6" name="Page-1">
+        <mxGraphModel dx="994" dy="528" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="Task Service" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+                    <mxGeometry x="60" y="200" width="100" height="1250" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Task Usecase" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+                    <mxGeometry x="280" y="200" width="100" height="1250" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="Task Repository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+                    <mxGeometry x="500" y="200" width="100" height="1250" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="Task DataResources" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+                    <mxGeometry x="720" y="200" width="100" height="1250" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="Perform transform tasks" style="html=1;verticalAlign=bottom;startArrow=oval;startFill=1;endArrow=block;startSize=8;curved=0;rounded=0;" edge="1" parent="1" source="2" target="3">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="120" y="300" as="sourcePoint"/>
+                        <mxPoint x="289.5" y="300" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="290" y="300"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" value="Get sync tasks with done status" style="html=1;verticalAlign=bottom;startArrow=oval;startFill=1;endArrow=block;startSize=8;curved=0;rounded=0;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="330" y="330" as="sourcePoint"/>
+                        <mxPoint x="550" y="330" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="510.5" y="330"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9" value="Return sync tasks with done status" style="html=1;verticalAlign=bottom;startArrow=classic;startFill=1;endArrow=none;startSize=8;curved=0;rounded=0;endFill=0;dashed=1;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="330" y="390" as="sourcePoint"/>
+                        <mxPoint x="550" y="390" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="510.5" y="390"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="10" value="Task Handler" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+                    <mxGeometry x="940" y="200" width="100" height="1250" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="Get sync tasks with done status" style="html=1;verticalAlign=bottom;startArrow=oval;startFill=1;endArrow=block;startSize=8;curved=0;rounded=0;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="550" y="340" as="sourcePoint"/>
+                        <mxPoint x="770" y="340" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="730.5" y="340"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="12" value="Return sync tasks with done status" style="html=1;verticalAlign=bottom;startArrow=classic;startFill=1;endArrow=none;startSize=8;curved=0;rounded=0;endFill=0;dashed=1;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="550" y="370" as="sourcePoint"/>
+                        <mxPoint x="770" y="370" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="730.5" y="370"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="13" value="Create transform task with open status&amp;nbsp;" style="html=1;verticalAlign=bottom;startArrow=oval;startFill=1;endArrow=block;startSize=8;curved=0;rounded=0;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="330" y="430" as="sourcePoint"/>
+                        <mxPoint x="550" y="430" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="510.5" y="430"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="14" value="Create transform task with open status&amp;nbsp;" style="html=1;verticalAlign=bottom;startArrow=oval;startFill=1;endArrow=block;startSize=8;curved=0;rounded=0;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="550" y="450" as="sourcePoint"/>
+                        <mxPoint x="770" y="450" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="730.5" y="450"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="15" value="Return created transform tasks and error" style="html=1;verticalAlign=bottom;startArrow=classic;startFill=1;endArrow=none;startSize=8;curved=0;rounded=0;endFill=0;dashed=1;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="550" y="480" as="sourcePoint"/>
+                        <mxPoint x="770" y="480" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="730.5" y="480"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="16" value="Return created transform tasks and error" style="html=1;verticalAlign=bottom;startArrow=classic;startFill=1;endArrow=none;startSize=8;curved=0;rounded=0;endFill=0;dashed=1;" edge="1" parent="1">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="330" y="500" as="sourcePoint"/>
+                        <mxPoint x="550" y="500" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="510.5" y="500"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="17" value="Call task handler to perform transform task&amp;nbsp;" style="html=1;verticalAlign=bottom;startArrow=oval;startFill=1;endArrow=block;startSize=8;curved=0;rounded=0;" edge="1" parent="1" target="10">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="330" y="550" as="sourcePoint"/>
+                        <mxPoint x="550" y="550" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="510.5" y="550"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="18" value="Return result" style="html=1;verticalAlign=bottom;startArrow=classic;startFill=1;endArrow=none;startSize=8;curved=0;rounded=0;endFill=0;dashed=1;" edge="1" parent="1" target="10">
+                    <mxGeometry width="60" relative="1" as="geometry">
+                        <mxPoint x="330" y="580" as="sourcePoint"/>
+                        <mxPoint x="550" y="580" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="510.5" y="580"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

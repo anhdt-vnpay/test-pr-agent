@@ -1,0 +1,46 @@
+{
+    "network": {
+        "useTLS": false,
+        "requireClientCert": false,
+        "submitTimeout": "60s",
+        "retryConnection": "3s",
+        "peerClientTimeout": "3s",
+        "channels": [
+            {
+                "id": "test",
+                "shardId": "test",
+                "chaincodeName": "test_v1",
+                "signer": {
+                    "peerName": "test",
+                    "MSPID": "SIGNER1",
+                    "IdentityPath": "config/crypto-test/cert.pem",
+                    "KeyPath": "config/crypto-test/key.pem"
+                },
+                "orderers": [
+                    {
+                        "ordererAddress": "orderer0.orderer.chain1.com:7050",
+                        "tlsRootCA": "config/crypto-chain1-local/orderers/orderer0.orderer.chain1.com/tls/ca.crt"
+                    },
+                    {
+                        "ordererAddress": "orderer1.orderer.chain1.com:17050",
+                        "tlsRootCA": "config/crypto-chain1-local/orderers/orderer1.orderer.chain1.com/tls/ca.crt"
+                    },
+                    {
+                        "ordererAddress": "orderer2.orderer.chain1.com:27050",
+                        "tlsRootCA": "config/crypto-chain1-local/orderers/orderer2.orderer.chain1.com/tls/ca.crt"
+                    }
+                ],
+                "peers": [
+                    {
+                        "peerName": "test",
+                        "peerAddress": "localhost:8080",
+                        "tlsRootCertFile": "config/crypto-test/ca.pem",
+                        "tlsKeyFile": "config/crypto-test/key.pem",
+                        "tlsCertFile": "config/crypto-test/cert.pem"
+                    }
+                ]
+            }
+            
+        ]
+    }
+}

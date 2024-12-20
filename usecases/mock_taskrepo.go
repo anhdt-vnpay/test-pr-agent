@@ -23,23 +23,23 @@ func (_m *MockTaskRepo) EXPECT() *MockTaskRepo_Expecter {
 }
 
 // CreateTask provides a mock function with given fields: taskType, taskStatus, data
-func (_m *MockTaskRepo) CreateTask(taskType int32, taskStatus int32, data any) (*entities.Tasks, common.BaseError) {
+func (_m *MockTaskRepo) CreateTask(taskType int32, taskStatus int32, data any) (*entities.Task, common.BaseError) {
 	ret := _m.Called(taskType, taskStatus, data)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateTask")
 	}
 
-	var r0 *entities.Tasks
+	var r0 *entities.Task
 	var r1 common.BaseError
-	if rf, ok := ret.Get(0).(func(int32, int32, any) (*entities.Tasks, common.BaseError)); ok {
+	if rf, ok := ret.Get(0).(func(int32, int32, any) (*entities.Task, common.BaseError)); ok {
 		return rf(taskType, taskStatus, data)
 	}
-	if rf, ok := ret.Get(0).(func(int32, int32, any) *entities.Tasks); ok {
+	if rf, ok := ret.Get(0).(func(int32, int32, any) *entities.Task); ok {
 		r0 = rf(taskType, taskStatus, data)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entities.Tasks)
+			r0 = ret.Get(0).(*entities.Task)
 		}
 	}
 
@@ -74,34 +74,34 @@ func (_c *MockTaskRepo_CreateTask_Call) Run(run func(taskType int32, taskStatus 
 	return _c
 }
 
-func (_c *MockTaskRepo_CreateTask_Call) Return(_a0 *entities.Tasks, _a1 common.BaseError) *MockTaskRepo_CreateTask_Call {
+func (_c *MockTaskRepo_CreateTask_Call) Return(_a0 *entities.Task, _a1 common.BaseError) *MockTaskRepo_CreateTask_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockTaskRepo_CreateTask_Call) RunAndReturn(run func(int32, int32, any) (*entities.Tasks, common.BaseError)) *MockTaskRepo_CreateTask_Call {
+func (_c *MockTaskRepo_CreateTask_Call) RunAndReturn(run func(int32, int32, any) (*entities.Task, common.BaseError)) *MockTaskRepo_CreateTask_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // LoadTasks provides a mock function with given fields: taskType, taskStatus
-func (_m *MockTaskRepo) LoadTasks(taskType int32, taskStatus int32) ([]*entities.Tasks, common.BaseError) {
+func (_m *MockTaskRepo) LoadTasks(taskType int32, taskStatus int32) ([]*entities.Task, common.BaseError) {
 	ret := _m.Called(taskType, taskStatus)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LoadTasks")
 	}
 
-	var r0 []*entities.Tasks
+	var r0 []*entities.Task
 	var r1 common.BaseError
-	if rf, ok := ret.Get(0).(func(int32, int32) ([]*entities.Tasks, common.BaseError)); ok {
+	if rf, ok := ret.Get(0).(func(int32, int32) ([]*entities.Task, common.BaseError)); ok {
 		return rf(taskType, taskStatus)
 	}
-	if rf, ok := ret.Get(0).(func(int32, int32) []*entities.Tasks); ok {
+	if rf, ok := ret.Get(0).(func(int32, int32) []*entities.Task); ok {
 		r0 = rf(taskType, taskStatus)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*entities.Tasks)
+			r0 = ret.Get(0).([]*entities.Task)
 		}
 	}
 
@@ -135,12 +135,63 @@ func (_c *MockTaskRepo_LoadTasks_Call) Run(run func(taskType int32, taskStatus i
 	return _c
 }
 
-func (_c *MockTaskRepo_LoadTasks_Call) Return(_a0 []*entities.Tasks, _a1 common.BaseError) *MockTaskRepo_LoadTasks_Call {
+func (_c *MockTaskRepo_LoadTasks_Call) Return(_a0 []*entities.Task, _a1 common.BaseError) *MockTaskRepo_LoadTasks_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockTaskRepo_LoadTasks_Call) RunAndReturn(run func(int32, int32) ([]*entities.Tasks, common.BaseError)) *MockTaskRepo_LoadTasks_Call {
+func (_c *MockTaskRepo_LoadTasks_Call) RunAndReturn(run func(int32, int32) ([]*entities.Task, common.BaseError)) *MockTaskRepo_LoadTasks_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateTasks provides a mock function with given fields: tasksId, tasksType, taskStatus, data
+func (_m *MockTaskRepo) UpdateTasks(tasksId int64, tasksType int32, taskStatus int32, data any) common.BaseError {
+	ret := _m.Called(tasksId, tasksType, taskStatus, data)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateTasks")
+	}
+
+	var r0 common.BaseError
+	if rf, ok := ret.Get(0).(func(int64, int32, int32, any) common.BaseError); ok {
+		r0 = rf(tasksId, tasksType, taskStatus, data)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(common.BaseError)
+		}
+	}
+
+	return r0
+}
+
+// MockTaskRepo_UpdateTasks_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateTasks'
+type MockTaskRepo_UpdateTasks_Call struct {
+	*mock.Call
+}
+
+// UpdateTasks is a helper method to define mock.On call
+//   - tasksId int64
+//   - tasksType int32
+//   - taskStatus int32
+//   - data any
+func (_e *MockTaskRepo_Expecter) UpdateTasks(tasksId interface{}, tasksType interface{}, taskStatus interface{}, data interface{}) *MockTaskRepo_UpdateTasks_Call {
+	return &MockTaskRepo_UpdateTasks_Call{Call: _e.mock.On("UpdateTasks", tasksId, tasksType, taskStatus, data)}
+}
+
+func (_c *MockTaskRepo_UpdateTasks_Call) Run(run func(tasksId int64, tasksType int32, taskStatus int32, data any)) *MockTaskRepo_UpdateTasks_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(int64), args[1].(int32), args[2].(int32), args[3].(any))
+	})
+	return _c
+}
+
+func (_c *MockTaskRepo_UpdateTasks_Call) Return(_a0 common.BaseError) *MockTaskRepo_UpdateTasks_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockTaskRepo_UpdateTasks_Call) RunAndReturn(run func(int64, int32, int32, any) common.BaseError) *MockTaskRepo_UpdateTasks_Call {
 	_c.Call.Return(run)
 	return _c
 }

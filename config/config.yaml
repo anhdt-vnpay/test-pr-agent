@@ -1,0 +1,41 @@
+Ledger:
+  MaxQueryGoroutine: 1
+  BlockMainQueueSize: 100
+  BlockExceptionQueueSize: 100
+  NumberBlockParsingWorker: 100
+  BlockLoadExceptionInterval: 500ms
+  BlockMinExceptionLoadTime: 500ms
+  UpdateMissing: true
+  BlockSyncTime: 10s
+  PeerGRPCTimeout: 3s
+
+Storage:
+  RootFolder: ./tmp
+  Type: 1 # 1: GoLevelDB - 2: BlcvnLevelDB - 3: Pebble
+
+DB:
+  onchain:
+    type: ORACLE
+    host: 10.22.19.174
+    port: 1521
+    database: OSBVBA
+    username: OSB_ONCHAIN
+    password: OSB_ONCHAIN
+    schema: OSB_ONCHAIN
+    connection-timeout: 600 # seconds
+    transaction-timeout: 60s # seconds
+
+    table-name-mapping:
+        block: "BLOCK"  # Save blocks
+        raw_transaction: "RAW_TRANSACTION"    # Save transactions in a block
+        account_init: "ACCOUNT_INIT"      # Save original accounts
+        account_transactions: "ACCOUNT_TRANSACTIONS"  # Save all transactions related to an account
+        onchain_transaction: "ONCHAIN_TRANSACTION"   # Save full transaction from on-chain
+        account_delta: "ACCOUNT_DELTA"    # Save delta amount related to an account
+        account_balance: "ACCOUNT_BALANCE"      # Save balance of all accounts
+        account_balance_backup: "ACCOUNT_BALANCE_BACKUP"      # Save balance of all accounts
+        exception_transactions: "EXCEPTION_TRANSACTIONS" # Save exception transaction reported from api
+
+Log:
+  Level: DEBUG # DEBUG/INFO/WARN/ERROR
+  Format: "%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}" # default: json
