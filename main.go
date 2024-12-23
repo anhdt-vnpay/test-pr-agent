@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	os.Setenv("TZ", "Asia/Ho_Chi_Minh")
+	os.Setenv("TZ", "Asia/Ha_Noi")
 	if err := cmd.RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(-1)
