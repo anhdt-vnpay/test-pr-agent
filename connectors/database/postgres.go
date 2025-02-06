@@ -9,6 +9,17 @@ import (
 )
 
 func InitPostgresClient(dbConfig map[string]string) *gorm.DB {
+ /*
+ InitPostgresClient initializes a new PostgreSQL client using the provided database configuration.
+ It constructs a Data Source Name (DSN) from the configuration map and attempts to establish a connection.
+ If the connection fails or the host is not provided, it returns nil.
+
+ Parameters:
+ dbConfig - A map containing the database configuration with keys: "host-v3", "username-v3", "password-v3", "port-v3", "database-v3".
+
+ Returns:
+ *gorm.DB - A pointer to the GORM DB instance if the connection is successful, nil otherwise.
+ */
 	host := dbConfig["host-v3"]
 	username := dbConfig["username-v3"]
 	password := dbConfig["password-v3"]
